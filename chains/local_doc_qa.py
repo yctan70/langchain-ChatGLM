@@ -62,7 +62,7 @@ def load_file(filepath, sentence_size=SENTENCE_SIZE, using_zh_title_enhance=ZH_T
     if filepath.lower().endswith(".md"):
         loader = UnstructuredFileLoader(filepath, mode="elements")
         docs = loader.load()
-    elif filepath.lower().endswith(".txt"):
+    elif filepath.lower().endswith(".pac") or filepath.lower().endswith(".hal") or filepath.lower().endswith(".ini"):
         loader = TextLoader(filepath, autodetect_encoding=True)
         textsplitter = ChineseTextSplitter(pdf=False, sentence_size=sentence_size)
         docs = loader.load_and_split(textsplitter)
@@ -144,6 +144,7 @@ class LocalDocQA:
                                     sentence_size=SENTENCE_SIZE):
         loaded_files = []
         failed_files = []
+        docs = []
         if isinstance(filepath, str):
             if not os.path.exists(filepath):
                 print("路径不存在")
@@ -174,7 +175,6 @@ class LocalDocQA:
                         logger.info(f"{file}\n")
 
         else:
-            docs = []
             for file in filepath:
                 try:
                     docs += load_file(file)
@@ -183,10 +183,11 @@ class LocalDocQA:
                 except Exception as e:
                     logger.error(e)
                     logger.info(f"{file} 未能成功加载")
-        if len(docs) > 0:
+        if len(docs) > 0 or vs_path:
             logger.info("文件加载完毕，正在生成向量库")
             if vs_path and os.path.isdir(vs_path) and "index.faiss" in os.listdir(vs_path):
                 vector_store = load_vector_store(vs_path, self.embeddings)
+                if len(docs) > 0:
                 vector_store.add_documents(docs)
                 torch_gc()
             else:
@@ -196,8 +197,8 @@ class LocalDocQA:
                                            "vector_store")
                 vector_store = MyFAISS.from_documents(docs, self.embeddings)  # docs 为Document列表
                 torch_gc()
+                vector_store.save_local(vs_path)
 
-            vector_store.save_local(vs_path)
             return vs_path, loaded_files
         else:
             logger.info("文件均未成功加载，请检查依赖包或替换为其他文件再次上传。")
