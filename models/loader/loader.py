@@ -10,6 +10,7 @@ import transformers
 from transformers import (AutoConfig, AutoModel, AutoModelForCausalLM,
                           AutoTokenizer, LlamaTokenizer)
 from configs.model_config import LLM_DEVICE
+import chatglm_cpp
 
 
 class LoaderCheckPoint:
@@ -70,6 +71,9 @@ class LoaderCheckPoint:
 
     def _load_model_config(self):
 
+        if self.model_name == "chatglm2-ggml":
+            return None
+
         if self.model_path:
             self.model_path = re.sub("\s", "", self.model_path)
             checkpoint = Path(f'{self.model_path}')
@@ -83,7 +87,6 @@ class LoaderCheckPoint:
 
         print(f"load_model_config {checkpoint}...")
         try:
-
             model_config = AutoConfig.from_pretrained(checkpoint, trust_remote_code=True)
             return model_config
         except Exception as e:
@@ -109,6 +112,12 @@ class LoaderCheckPoint:
                 checkpoint = self.pretrained_model_name
 
         print(f"Loading {checkpoint}...")
+
+        if self.model_name == "chatglm2-ggml":
+            model = chatglm_cpp.Pipeline(checkpoint)
+            self.is_llamacpp = True
+            return model, None
+
         self.is_llamacpp = len(list(Path(f'{checkpoint}').glob('ggml*.bin'))) > 0
         if 'chatglm' in self.model_name.lower() or "chatyuan" in self.model_name.lower():
             LoaderClass = AutoModel
