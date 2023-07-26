@@ -8,8 +8,10 @@ import models.shared as shared
 from models.loader.args import parser
 from models.loader import LoaderCheckPoint
 import os
+import glob
 
 nltk.data.path = [NLTK_DATA_PATH] + nltk.data.path
+LOADER_MAPPING = [".csv", ".pdf", ".pac", ".hal", ".ini"]
 
 
 def get_vs_list():
@@ -143,15 +145,15 @@ def reinit_model(llm_model, embedding_model, llm_history_len, no_remote_model, u
 
 
 def get_vector_store(vs_id, files, sentence_size, history, one_conent, one_content_segmentation):
-    vs_path = os.path.join(KB_ROOT_PATH, vs_id, "vector_store")
-    filelist = []
+    vs_path = os.path.join(KB_ROOT_PATH, vs_id, f"{vs_id}_FAISS_20230714_165857", "vector_store")
+    all_files = []
     if local_doc_qa.llm_model_chain and local_doc_qa.embeddings:
         if isinstance(files, list):
-            for file in files:
-                filename = os.path.split(file.name)[-1]
-                shutil.move(file.name, os.path.join(KB_ROOT_PATH, vs_id, "content", filename))
-                filelist.append(os.path.join(KB_ROOT_PATH, vs_id, "content", filename))
-            vs_path, loaded_files = local_doc_qa.init_knowledge_vector_store(filelist, vs_path, sentence_size)
+            for ext in LOADER_MAPPING:
+                all_files.extend(
+                    glob.glob(os.path.join(vs_id, f"**/*{ext}"), recursive=True)
+                )
+            vs_path, loaded_files = local_doc_qa.init_knowledge_vector_store(all_files, vs_path)
         else:
             vs_path, loaded_files = local_doc_qa.one_knowledge_add(vs_path, files, one_conent, one_content_segmentation,
                                                                    sentence_size)
@@ -571,5 +573,5 @@ with gr.Blocks(css=block_css, theme=gr.themes.Default(**default_theme_args)) as 
  .launch(server_name='0.0.0.0',
          server_port=7860,
          show_api=False,
-         share=False,
+         share=True,
          inbrowser=False))
