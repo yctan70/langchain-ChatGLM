@@ -19,6 +19,7 @@ from langchain.docstore.document import Document
 from functools import lru_cache
 from textsplitter.zh_title_enhance import zh_title_enhance
 from langchain.chains.base import Chain
+from pathlib import Path
 
 
 # patch HuggingFaceEmbeddings to make it hashable
@@ -188,12 +189,13 @@ class LocalDocQA:
             if vs_path and os.path.isdir(vs_path) and "index.faiss" in os.listdir(vs_path):
                 vector_store = load_vector_store(vs_path, self.embeddings)
                 if len(docs) > 0:
-                vector_store.add_documents(docs)
+                    vector_store.add_documents(docs)
                 torch_gc()
             else:
                 if not vs_path:
+                    file_parts = Path(filepath[0]).parts
                     vs_path = os.path.join(KB_ROOT_PATH,
-                                           f"""{"".join(lazy_pinyin(os.path.splitext(file)[0]))}_FAISS_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}""",
+                                           f"""{"".join(lazy_pinyin(file_parts[0]))}_FAISS_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}""",
                                            "vector_store")
                 vector_store = MyFAISS.from_documents(docs, self.embeddings)  # docs 为Document列表
                 torch_gc()
