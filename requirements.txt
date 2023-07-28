@@ -20,6 +20,8 @@ tabulate
 feedparser
 azure-core
 openai
+chatglm-cpp
+protobuf
 #accelerate~=0.18.0
 #peft~=0.3.0
 #bitsandbytes; platform_system != "Windows"
