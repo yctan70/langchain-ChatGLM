@@ -186,13 +186,13 @@ llm_model_dict = {
         "provides": "FastChatOpenAILLMChain",
         "local_model_path": None,
         "api_base_url": "https://api.openapi.com/v1",
-        "api_key": ""
+        "api_key": "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"
     },
 
 }
 
 # LLM 名称
-LLM_MODEL = "chatglm2-ggml"
+LLM_MODEL = "openai-chatgpt-3.5"
 # 量化加载8bit 模型
 LOAD_IN_8BIT = False
 # Load the model with bfloat16 precision. Requires NVIDIA Ampere GPU.
@@ -214,7 +214,8 @@ USE_PTUNING_V2 = False
 LLM_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 
 # 知识库默认存储路径
-KB_ROOT_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "knowledge_base")
+# KB_ROOT_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "knowledge_base")
+KB_ROOT_PATH = os.path.join("/home/yctan/PycharmProjects/langchain-ChatGLM", "knowledge_base")
 
 # 基于上下文的prompt模版，请务必保留"{question}"和"{context}"
 PROMPT_TEMPLATE = """已知信息：

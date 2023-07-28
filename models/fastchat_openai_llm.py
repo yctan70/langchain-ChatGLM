@@ -196,7 +196,7 @@ class FastChatOpenAILLMChain(RemoteRpcModel, Chain, ABC):
             # Not support yet
             # openai.api_key = "EMPTY"
             openai.api_key = self.api_key
-            openai.api_base = self.api_base_url
+            # openai.api_base = self.api_base_url
             self.client = openai.ChatCompletion
         except AttributeError:
             raise ValueError(

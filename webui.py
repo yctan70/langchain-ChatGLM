@@ -145,15 +145,15 @@ def reinit_model(llm_model, embedding_model, llm_history_len, no_remote_model, u
 
 
 def get_vector_store(vs_id, files, sentence_size, history, one_conent, one_content_segmentation):
-    vs_path = os.path.join(KB_ROOT_PATH, vs_id, f"{vs_id}_FAISS_20230714_165857", "vector_store")
+    vs_path = os.path.join(KB_ROOT_PATH, vs_id, "vector_store")
     all_files = []
     if local_doc_qa.llm_model_chain and local_doc_qa.embeddings:
         if isinstance(files, list):
-            for ext in LOADER_MAPPING:
-                all_files.extend(
-                    glob.glob(os.path.join(vs_id, f"**/*{ext}"), recursive=True)
-                )
-            vs_path, loaded_files = local_doc_qa.init_knowledge_vector_store(all_files, vs_path)
+            for file in files:
+                filename = os.path.split(file.name)[-1]
+                shutil.move(file.name, os.path.join(KB_ROOT_PATH, vs_id, "content", filename))
+                all_files.append(os.path.join(KB_ROOT_PATH, vs_id, "content", filename))
+            vs_path, loaded_files = local_doc_qa.init_knowledge_vector_store(all_files, vs_path, sentence_size)
         else:
             vs_path, loaded_files = local_doc_qa.one_knowledge_add(vs_path, files, one_conent, one_content_segmentation,
                                                                    sentence_size)
