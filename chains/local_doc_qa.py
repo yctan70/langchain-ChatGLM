@@ -190,6 +190,7 @@ class LocalDocQA:
                 vector_store = load_vector_store(vs_path, self.embeddings)
                 if len(docs) > 0:
                     vector_store.add_documents(docs)
+                    vector_store.save_local(vs_path)
                 torch_gc()
             else:
                 if not vs_path:
@@ -199,8 +200,7 @@ class LocalDocQA:
                                            "vector_store")
                 vector_store = MyFAISS.from_documents(docs, self.embeddings)  # docs 为Document列表
                 torch_gc()
-
-            vector_store.save_local(vs_path)
+                vector_store.save_local(vs_path)
             return vs_path, loaded_files
         else:
             logger.info("文件均未成功加载，请检查依赖包或替换为其他文件再次上传。")
